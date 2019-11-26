@@ -114,39 +114,7 @@ class _FirstScreenState extends State<FirstScreen> {
                           MaterialPageRoute<void>(
                               builder: (context) => NewShout()),
                         );
-    //         showDialog(
-    //             context: context,
-                
-    //             builder: (BuildContext build) {
-                
-    //               return SimpleDialog(
-    //                 title: Text("Add A Shout"),
-    //                 children: <Widget>[
-    //                   RaisedButton.icon(
-    //                       icon:Icon(Icons.calendar_today),
-    //                       onPressed: () {
-    //     DatePicker.showDatePicker(context,
-    //                           showTitleActions: true,
-    //                           minTime: DateTime.now(),
-    //                           maxTime: DateTime(2021, 1, 1), onChanged: (date) {
-    //                         print('change $date');
-    //                       }, onConfirm: (date) {
-    //                         setState(() {
-    //                           shoutDate=date;
-    //                         _dateLabelText=date.toIso8601String();
-    //                         });
-    //                         print('confirm $date');
-    //                       }, currentTime: DateTime.now(), locale: LocaleType.en);
-    // },
-    //                       label: Text(_dateLabelText),
-    //                       ),
-    //                 ],
-    //               contentPadding: EdgeInsets.symmetric(
-    //                 horizontal: 20,
-    //                 vertical: 20,
-    //               )
-    //               );
-    //             });
+    
           },
           backgroundColor: Colors.blue,
           foregroundColor: Colors.white,

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:uuid/uuid.dart';
+import 'package:firebase_database/firebase_database.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
 
 class NewShout extends StatefulWidget{
   @override
@@ -17,7 +18,8 @@ class NewShoutState extends State<NewShout>{
   String _dateLabelText="Select a Date";
   final _formKey = GlobalKey<FormState>();
   DateFormat dateFormat = DateFormat("MMMM d y");
-  // var uuid = new Uuid();
+  final databaseReference = FirebaseDatabase.instance.reference();
+  var uuid = new Uuid();
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +29,10 @@ class NewShoutState extends State<NewShout>{
         RaisedButton.icon(
           icon:Icon(Icons.calendar_today),
           onPressed: () {
-            DatePicker.showDatePicker(
+            DatePicker.showDateTimePicker(
               context, 
               showTitleActions: true, 
-              minTime: DateTime.now(),
+              minTime: DateTime(2019,1,1),//.now(),
               maxTime: DateTime(2021, 1, 1),
               onChanged: (date) {
               print('change $date');
@@ -71,12 +73,21 @@ class NewShoutState extends State<NewShout>{
                     )),
                     RaisedButton(child: Text('Submit'),onPressed: (){
                       if(_formKey.currentState.validate()){
-                        Firestore.instance.collection('shouts').document('randomvalue').setData(
-                          {
-                            'date':_shoutDate,
-                            'venue':_shoutVenue
-                          }
-                          );
+                        // Firestore.instance.collection('shouts').document('randomvalue').setData(
+                        //   {
+                        //     'date':_shoutDate,
+                        //     'venue':_shoutVenue
+                        //   }
+                        //   );
+                        String newid=uuid.v4();
+                      databaseReference.child("shouts/"+newid).set(
+                        {
+                          'id':newid,
+                         'date':_shoutDate.toIso8601String(),
+                         'venue':_shoutVenue 
+                        }).then((onValue){
+                          Navigator.pop(context,"posted");
+                        });
                       }
                     },)
       ],),)
