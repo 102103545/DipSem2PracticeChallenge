@@ -49,7 +49,7 @@ class PastState extends State<Past>{
         onTap: (){Navigator.push(
                           context,
                           MaterialPageRoute<void>(
-                              builder: (context) => ShoutDetail(item[0].toString())),
+                              builder: (context) => ShoutDetail(item['id'])),
                         );},
         child: 
         Card(child: Column(children: <Widget>[
