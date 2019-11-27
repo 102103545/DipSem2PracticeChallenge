@@ -52,22 +52,22 @@ Future<String> signInWithGoogle() async {
       {
         String newid=uuid.v4();
         databaseReference.child("users/"+newid).set(
-          {
+          { 'id':newid,
             'email':email,
             'name':name,
             'imageurl':imageUrl,
-            'approved':0 
+            'approved':'pending'
           }).then((onValue){});
         }
       }
       else{
         String newid=uuid.v4();
         databaseReference.child("users/"+newid).set(
-          {
+          { 'id':newid,
             'email':email,
             'name':name,
             'imageurl':imageUrl,
-            'approved':0 
+            'approved':'pending' 
           }).then((onValue){});
       }
     });

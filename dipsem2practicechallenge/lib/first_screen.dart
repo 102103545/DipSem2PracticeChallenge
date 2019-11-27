@@ -1,11 +1,14 @@
 
 
 import 'package:dipsem2practicechallenge/new_shout.dart';
+import 'package:dipsem2practicechallenge/pending_members.dart';
 import 'package:dipsem2practicechallenge/sign_in.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 
 import 'login_page.dart';
+import 'members.dart';
 import 'past.dart';
 import 'future.dart';
 
@@ -20,17 +23,67 @@ class FirstScreen extends StatefulWidget{
 class _FirstScreenState extends State<FirstScreen> {
   int _currentIndex = 0;
   DateTime shoutDate;
-  
+  final databaseReference = FirebaseDatabase.instance.reference();
+  Map<dynamic, dynamic> user;
+  bool loading=true;
   // List<Widget> _children=[
   //   Past(email),
   //   Future(email)
   // ];
 
-  
+   void initState() {   
+       databaseReference.child("users").once().then((DataSnapshot snapshot){
+         Map<dynamic,dynamic> userMap=snapshot.value;
+         for(int i=0;i<userMap.length;i++){
+           if(userMap.values.toList()[i]['email']==email){
+             setState(() {
+          user=userMap.values.toList()[i];
+          loading=false;
+         });
+           }
+         }        
+       });
+       setState(() {
+        loading=false; 
+       });
+    super.initState();
+  }
   
   @override
+  
+
   Widget build(BuildContext context) {
-    return Scaffold(
+    bool isapproved(){
+    if(user['approved']=='approved')
+      {
+        return true;
+      }
+      else
+      {
+        print(user['approved']);
+        return false;
+      }
+    }
+
+    showfirstpage(){
+
+databaseReference.child("users").once().then((DataSnapshot snapshot){
+         Map<dynamic,dynamic> userMap=snapshot.value;
+         for(int i=0;i<userMap.length;i++){
+           if(userMap.values.toList()[i]['email']==email){
+             setState(() {
+          user=userMap.values.toList()[i];
+          loading=false;
+         });
+           }
+         }        
+       });
+
+      if(loading){
+      return CircularProgressIndicator();
+    }
+    else{
+      return Scaffold(
       body:SingleChildScrollView( child:
       Column(
         children:[
@@ -108,18 +161,20 @@ class _FirstScreenState extends State<FirstScreen> {
           ),
         ),
       ),
-      [Past(email),Future(email)][_currentIndex]
+      [Past(email),Future(email),Members(email),PendingMembers(email)][_currentIndex]
       
       ])),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: Visibility(
+        visible: isapproved(),
+        child:FloatingActionButton(          
           child: Icon(Icons.plus_one),
           tooltip: "Translate legislation",
-          onPressed: () async {
-            var result=await Navigator.push(context,MaterialPageRoute<void>(builder: (context) => NewShout()),);    
+          onPressed: () {
+            Navigator.push(context,MaterialPageRoute<void>(builder: (context) => NewShout()),);    
           },
           backgroundColor: Colors.blue,
           foregroundColor: Colors.white,
-        ),
+        )),
       bottomNavigationBar: BottomNavigationBar(
         onTap: onTabTapped,
         currentIndex: _currentIndex,
@@ -131,9 +186,25 @@ class _FirstScreenState extends State<FirstScreen> {
                 BottomNavigationBarItem(
                   icon: Icon(Icons.arrow_forward),
                   title: Text('Future')
-                  )
-              ],),
+                  ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.supervised_user_circle),
+                  title:Text('Members')
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.supervisor_account),
+                  title: Text("Pending Members")
+                )
+              ],
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        ),
     );
+    }
+    }
+
+    return showfirstpage();
+    
   }
 
 

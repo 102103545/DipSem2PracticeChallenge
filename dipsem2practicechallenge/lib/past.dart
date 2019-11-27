@@ -60,7 +60,7 @@ class PastState extends State<Past>{
     else if(user==null){
       return Text("user=null");
     }
-    else if(user['approved']==0){
+    else if(user['approved']!='approved'){
         return Text("Please Wait to be approved by an admin");
       }   
     else if(map!=null&&map.values!=null){
@@ -75,11 +75,16 @@ class PastState extends State<Past>{
                               builder: (context) => ShoutDetail(item['id'])),
                         );},
         child: 
-        Card(child: Column(children: <Widget>[
+        Card(child: 
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Column(children: <Widget>[
           Text("Date: "+dateFormat.format(DateTime.parse(item['date']))),
           Text("Time: "+timeFormat.format(DateTime.parse(item['date']))),
           Text("Venue: "+item['venue'].toString())
-        ],),),)
+        ],)
+        ],) ,),)
      ).toList());
     }
     else{

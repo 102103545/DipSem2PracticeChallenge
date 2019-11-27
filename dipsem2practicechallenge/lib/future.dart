@@ -3,7 +3,6 @@ import 'package:dipsem2practicechallenge/sign_in.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'future.dart';
 
 class Future extends StatefulWidget{
   Future(this.email);
@@ -38,10 +37,14 @@ class FutureState extends State<Future>{
          }        
        });
     databaseReference.child("shouts/").once().then((DataSnapshot snapshot){
-    setState(() {
+    try{
+ setState(() {
       map=snapshot.value;
       loading=false;
-    });  
+    }); 
+    }
+    catch(e){}
+    
     });
     super.initState();
   }
@@ -61,12 +64,21 @@ class FutureState extends State<Future>{
     else if(user==null){
       return Text("user=null");
     }
-    else if(user['approved']==0){
+    else if(user['approved']!='approved'){
         return Text("Please Wait to be approved by an admin");
       }   
     else if(map!=null&&map.values!=null){
       databaseReference.child("/shouts/").once().then((DataSnapshot snapshot) {
-      map = snapshot.value;
+      try{
+        setState(() {
+        map = snapshot.value;
+        loading=false;
+      });
+      }
+      catch(e){};
+      
+
+      
       });    
      return Column(children: map.values.toList().where((e)=>{DateTime.parse(e['date']).isAfter(DateTime.now())}.first).map((item)=>
        
@@ -80,9 +92,8 @@ class FutureState extends State<Future>{
           ],),
           //Padding(padding:EdgeInsets.fromLTRB(100,0,0,0),),
           GestureDetector(
-                onTap: (){databaseReference.child('shouts/'+item['id']).remove().then((value){setState(() {
-                useless="1234";  
-                });});
+                onTap: (){databaseReference.child('shouts/'+item['id']).remove().then((value){
+                  });
                 },
         child:Icon(Icons.delete))
         ],)

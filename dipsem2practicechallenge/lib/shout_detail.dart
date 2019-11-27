@@ -147,6 +147,7 @@ showShoutForm(){
               'member':shoutMember
             }
           );
+          Navigator.pop(context);
         }
         
       },
