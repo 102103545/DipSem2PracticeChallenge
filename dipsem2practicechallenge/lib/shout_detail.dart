@@ -17,7 +17,9 @@ class ShoutDetailState extends State<ShoutDetail>{
 
 final databaseReference = FirebaseDatabase.instance.reference();
   Map<dynamic, dynamic> map;
+  Map<dynamic, dynamic> membersMap;
   bool loading=true;
+  bool formloading=true;
   DateFormat dateFormat = DateFormat("MMMM d y");
   DateFormat timeFormat=DateFormat("h:mm a");
   String shoutDate="unset shoutDate";
@@ -27,6 +29,7 @@ final databaseReference = FirebaseDatabase.instance.reference();
   String shoutCost="N/A";
   TextEditingController shoutCostController=TextEditingController();
   final formKey=GlobalKey<FormState>();
+  List<DropdownMenuItem> memberslist;
   @override
   void initState() {
     databaseReference.child("shouts/"+id).once().then((DataSnapshot snapshot){
@@ -41,6 +44,13 @@ final databaseReference = FirebaseDatabase.instance.reference();
       {shoutMember=map['member'];}
       loading=false;
     });  
+    });
+    databaseReference.child('users').once().then((DataSnapshot snapshot){
+      membersMap=snapshot.value;
+      memberslist=membersMap.values.toList().map((item)=>DropdownMenuItem(child:Text(item['name']))).toList();
+      setState(() {
+        formloading=false;
+      });
     });
     super.initState();
   }
@@ -75,9 +85,13 @@ showShoutDetail(){
 }
 
 showShoutForm(){
+  if(formloading)
+  {return CircularProgressIndicator();}
+  else{
   return Form(key:formKey,
   child: Column(children: <Widget>[
     TextFormField(
+      //autovalidate: true,
       //initialValue: shoutCost,
       //onTap: (){print("tapped");},
       decoration: InputDecoration(labelText: 'Cost',icon: Icon(Icons.attach_money),hintText: shoutCost),
@@ -87,13 +101,72 @@ showShoutForm(){
         {return "please Enter a Cost";}
         if(int.tryParse(value)==null)
         {return "please enter a numeric cost";}
+        setState(() {
+          shoutCost=value;
+        });
       },
+    ),
+    DropdownFormField<String>(
+      validator:(value){
+        if(value==null)
+        {
+          return "Please Select Member";
+        }
+      },
+      onSaved:(value){
+        setState(() {
+          shoutMember=value;
+        });
+      },
+      decoration:InputDecoration(
+        icon: Icon(Icons.verified_user),
+        labelText: 'Member',  
+      ),
+      initialValue: null,
+      items:memberslist
     ),
     RaisedButton(
       child: Text("Submit"),
       onPressed: (){formKey.currentState.validate();},
     )
-  ],),);
+  ],),);}
 }
 
+}
+
+
+class DropdownFormField<T> extends FormField<T> {
+  DropdownFormField({
+    Key key,
+    InputDecoration decoration,
+    T initialValue,
+    List<DropdownMenuItem<T>> items,
+    bool autovalidate = false,
+    FormFieldSetter<T> onSaved,
+    FormFieldValidator<T> validator,
+  }) : super(
+          key: key,
+          onSaved: onSaved,
+          validator: validator,
+          autovalidate: autovalidate,
+          initialValue: items.contains(initialValue) ? initialValue : null,
+          builder: (FormFieldState<T> field) {
+            final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
+                .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+
+            return InputDecorator(
+              decoration:
+                  effectiveDecoration.copyWith(errorText: field.hasError ? field.errorText : null),
+              isEmpty: field.value == '' || field.value == null,
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<T>(
+                  value: field.value,
+                  isDense: true,
+                  onChanged: field.didChange,
+                  items: items.toList(),
+                ),
+              ),
+            );
+          },
+        );
 }

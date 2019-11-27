@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:uuid/uuid.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -29,6 +31,19 @@ Future<String> signInWithGoogle() async {
   name = user.displayName;
   email = user.email;
   imageUrl = user.photoUrl;
+
+  final databaseReference = FirebaseDatabase.instance.reference();
+  var uuid = new Uuid();
+  String newid=uuid.v4();
+                      databaseReference.child("users/"+newid).set(
+                        {
+                          'email':email,
+                         'name':name,
+                         'imageurl':imageUrl,
+                         'approved':0 
+                        }).then((onValue){
+                          
+                        });
 
   // Only taking the first part of the name, i.e., First Name
   if (name.contains(" ")) {
