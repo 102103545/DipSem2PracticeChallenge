@@ -47,7 +47,7 @@ final databaseReference = FirebaseDatabase.instance.reference();
     });
     databaseReference.child('users').once().then((DataSnapshot snapshot){
       membersMap=snapshot.value;
-      memberslist=membersMap.values.toList().map((item)=>DropdownMenuItem(child:Text(item['name']))).toList();
+      memberslist=membersMap.values.toList().map((item)=>DropdownMenuItem(child:Row(children:<Widget>[Text(item['name']),Image.network(item['imageurl']),Text(item['email'])]),value: item['email'],)).toList();
       setState(() {
         formloading=false;
       });
@@ -78,7 +78,11 @@ showShoutDetail(){
           Text("Time:",style: TextStyle(fontSize: 20,fontWeight:FontWeight.bold),),
           Text(timeFormat.format(DateTime.parse(shoutDate))),
           Text("Venue:",style: TextStyle(fontSize: 20,fontWeight:FontWeight.bold),),
-          Text(shoutVenue)
+          Text(shoutVenue),
+          Text("Member email:",style: TextStyle(fontSize: 20,fontWeight:FontWeight.bold),),
+          Text(shoutMember),
+          Text("Cost:",style: TextStyle(fontSize: 20,fontWeight:FontWeight.bold),),
+          Text(shoutCost)
         ],
       ));
   }
@@ -94,24 +98,27 @@ showShoutForm(){
       //autovalidate: true,
       //initialValue: shoutCost,
       //onTap: (){print("tapped");},
-      decoration: InputDecoration(labelText: 'Cost',icon: Icon(Icons.attach_money),hintText: shoutCost),
+      decoration: InputDecoration(labelText: "Cost (\$)",icon: Icon(Icons.attach_money),hintText: shoutCost),
       keyboardType: TextInputType.phone,
       validator: (value){
         if(value.isEmpty)
         {return "please Enter a Cost";}
-        if(int.tryParse(value)==null)
+        if(double.tryParse(value)==null)
         {return "please enter a numeric cost";}
         setState(() {
           shoutCost=value;
         });
       },
     ),
-    DropdownFormField<String>(
+    DropdownFormField(
       validator:(value){
         if(value==null)
         {
           return "Please Select Member";
         }
+        setState(() {
+          shoutMember=value;
+        });
       },
       onSaved:(value){
         setState(() {
@@ -127,7 +134,22 @@ showShoutForm(){
     ),
     RaisedButton(
       child: Text("Submit"),
-      onPressed: (){formKey.currentState.validate();},
+      onPressed: ()
+      {
+        if(formKey.currentState.validate())
+        {
+          databaseReference.child("shouts/"+id).set(
+            {
+              'id':shoutID,
+              'date':shoutDate,
+              'venue':shoutVenue,
+              'cost':shoutCost,
+              'member':shoutMember
+            }
+          );
+        }
+        
+      },
     )
   ],),);}
 }

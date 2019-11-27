@@ -20,10 +20,13 @@ class FirstScreen extends StatefulWidget{
 class _FirstScreenState extends State<FirstScreen> {
   int _currentIndex = 0;
   DateTime shoutDate;
-  List<Widget> _children=[
-    Past(),
-    Future()
-  ];
+  
+  // List<Widget> _children=[
+  //   Past(email),
+  //   Future(email)
+  // ];
+
+  
   
   @override
   Widget build(BuildContext context) {
@@ -104,17 +107,15 @@ class _FirstScreenState extends State<FirstScreen> {
             ],
           ),
         ),
-      ),_children[_currentIndex]])),
+      ),
+      [Past(email),Future(email)][_currentIndex]
+      
+      ])),
       floatingActionButton: FloatingActionButton(
           child: Icon(Icons.plus_one),
           tooltip: "Translate legislation",
-          onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute<void>(
-                              builder: (context) => NewShout()),
-                        );
-    
+          onPressed: () async {
+            var result=await Navigator.push(context,MaterialPageRoute<void>(builder: (context) => NewShout()),);    
           },
           backgroundColor: Colors.blue,
           foregroundColor: Colors.white,

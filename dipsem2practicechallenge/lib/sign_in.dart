@@ -34,16 +34,44 @@ Future<String> signInWithGoogle() async {
 
   final databaseReference = FirebaseDatabase.instance.reference();
   var uuid = new Uuid();
-  String newid=uuid.v4();
-                      databaseReference.child("users/"+newid).set(
-                        {
-                          'email':email,
-                         'name':name,
-                         'imageurl':imageUrl,
-                         'approved':0 
-                        }).then((onValue){
-                          
-                        });
+  Map<dynamic, dynamic> map;
+  databaseReference.child('users/').once().then((DataSnapshot snapshot){
+    bool userexists=false;
+    if(snapshot.value!=null)
+    {
+      map=snapshot.value;
+      for(int i=0;i<map.length;i++)
+      {
+        print(map.values.toList()[i]['email']);
+        if (map.values.toList()[i]['email']==email)
+        {
+          userexists=true;
+        }
+      }
+      if(!userexists)
+      {
+        String newid=uuid.v4();
+        databaseReference.child("users/"+newid).set(
+          {
+            'email':email,
+            'name':name,
+            'imageurl':imageUrl,
+            'approved':0 
+          }).then((onValue){});
+        }
+      }
+      else{
+        String newid=uuid.v4();
+        databaseReference.child("users/"+newid).set(
+          {
+            'email':email,
+            'name':name,
+            'imageurl':imageUrl,
+            'approved':0 
+          }).then((onValue){});
+      }
+    });
+  
 
   // Only taking the first part of the name, i.e., First Name
   if (name.contains(" ")) {

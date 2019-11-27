@@ -1,23 +1,42 @@
+import 'package:dipsem2practicechallenge/shout_detail.dart';
+import 'package:dipsem2practicechallenge/sign_in.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'future.dart';
 
 class Future extends StatefulWidget{
+  Future(this.email);
+  String email;
+
   @override
   State<StatefulWidget> createState() {
-    return new FutureState();
+    return new FutureState(email);
   }
 }
 
 class FutureState extends State<Future>{
   final databaseReference = FirebaseDatabase.instance.reference();
-  Map<dynamic, dynamic> map;
-  bool loading=true;
+   Map<dynamic, dynamic> map;
+   bool loading=true;
   DateFormat dateFormat = DateFormat("MMMM d y");
   DateFormat timeFormat=DateFormat("h:mm a");
+  String email;
+  FutureState(this.email);
+  Map<dynamic, dynamic> user;
+  var useless;
   @override
-  void initState() {
-    // TODO: implement initState
+  void initState() {   
+       databaseReference.child("users").once().then((DataSnapshot snapshot){
+         Map<dynamic,dynamic> userMap=snapshot.value;
+         for(int i=0;i<userMap.length;i++){
+           if(userMap.values.toList()[i]['email']==email){
+             setState(() {
+          user=userMap.values.toList()[i];
+         });
+           }
+         }        
+       });
     databaseReference.child("shouts/").once().then((DataSnapshot snapshot){
     setState(() {
       map=snapshot.value;
@@ -32,29 +51,50 @@ class FutureState extends State<Future>{
       Text('Future Page'),
       showShouts()
     ],);
-    
   }
-
-  showShouts(){
+  
+    showShouts(){
+       
     if(loading){
       return Center(child: CircularProgressIndicator());
     }
+    else if(user==null){
+      return Text("user=null");
+    }
+    else if(user['approved']==0){
+        return Text("Please Wait to be approved by an admin");
+      }   
     else if(map!=null&&map.values!=null){
       databaseReference.child("/shouts/").once().then((DataSnapshot snapshot) {
       map = snapshot.value;
       });    
      return Column(children: map.values.toList().where((e)=>{DateTime.parse(e['date']).isAfter(DateTime.now())}.first).map((item)=>
-     Card(child: Column(children: <Widget>[
-       Text("Date: "+dateFormat.format(DateTime.parse(item['date']))),
-       Text("Time: "+timeFormat.format(DateTime.parse(item['date']))),
-       Text("Venue: "+item['venue'].toString())
-     ],),)
-     
+       
+        Card(child: 
+        Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+          Column(children: <Widget>[
+            Text("Date: "+dateFormat.format(DateTime.parse(item['date']))),
+            Text("Time: "+timeFormat.format(DateTime.parse(item['date']))),
+            Text("Venue: "+item['venue'].toString())
+          ],),
+          //Padding(padding:EdgeInsets.fromLTRB(100,0,0,0),),
+          GestureDetector(
+                onTap: (){databaseReference.child('shouts/'+item['id']).remove().then((value){setState(() {
+                useless="1234";  
+                });});
+                },
+        child:Icon(Icons.delete))
+        ],)
+        
+        
+        ),
      ).toList());
+    }
+    else{
+      return Text("you're not suposed to see this");
     }
     
   }
-
-}
-
-//.where((e)=>{DateTime.parse(e['date'])>DateTime.now()}).
+  
+  }
